@@ -135,6 +135,17 @@ The application manages broadcast delivery configuration records. It does not di
 
 The public repository uses SQLite for local execution. The original deployment used PostgreSQL.
 
+## Screenshots
+
+### Dashboard
+![SRT Channel Management Dashboard](dashboard.png)
+
+### Service Management
+![Service Management](services.png)
+
+### Create and Edit Services
+![Create and Edit Services](create-edit-services.png)
+
 ## Author
 
 **Walter Vasquez**
