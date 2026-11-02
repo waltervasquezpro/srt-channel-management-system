@@ -1,0 +1,98 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+    
+
+    <h2 class="mb-3">Services</h2>
+
+    <a href="/services/create/" class="btn btn-primary mb-3">+ Create Service</a>
+    <div class="mb-3">
+        <a href="/services/" class="btn btn-outline-dark btn-sm">All</a>
+        <a href="/services/?status=ACTIVE" class="btn btn-outline-success btn-sm">Active</a>
+        <a href="/services/?status=TEST" class="btn btn-outline-warning btn-sm">Test</a>
+        <a href="/services/?status=REMOVED" class="btn btn-outline-secondary btn-sm">Removed</a>
+    </div>
+
+
+    <form method="get" class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-6">
+            <input type="text" name="q" class="form-control" placeholder="Search by customer, channel, IP..." value="{{ query|default:'' }}">
+        </div>
+
+        <div class="col-md-3">
+            <select name="order" class="form-select">
+                <option value="newest" {% if order == "newest" %}selected{% endif %}>Newest</option>
+                <option value="oldest" {% if order == "oldest" %}selected{% endif %}>Oldest</option>
+            </select>
+        </div>
+
+        {% if status_filter %}
+        <input type="hidden" name="status" value="{{ status_filter }}">
+        {% endif %}
+
+        <div class="col-md-3">
+            <button class="btn btn-outline-secondary w-100" type="submit">Apply</button>
+        </div>
+    </div>
+    </form>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Customer</th>
+                        <th>Channel</th>
+                        <th>IP</th>
+                        <th>Port</th>
+                        <th>Mode</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                    <tr>
+                        <td>{{ service.customer.name }}</td>
+                        <td>{{ service.channel.name }}</td>
+                        <td>{{ service.public_ip }}</td>
+                        <td>{{ service.port }}</td>
+                        <td>{{ service.mode }}</td>
+                        <td>
+                            {% if service.status == "ACTIVE" %}
+                                <span class="badge bg-success">Active</span>
+
+                            {% elif service.status == "TEST" %}
+                                <span class="badge bg-warning text-dark">Test</span>
+
+                                {% if service.test_expired %}
+                                    <span class="badge bg-danger">Expired</span>
+                                {% endif %}
+
+                            {% else %}
+                                <span class="badge bg-secondary">Removed</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ service.created_at|date:"m-d-Y" }}</td>
+
+                        <td>
+                            <a href="/services/{{ service.id }}/edit/" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="/services/{{ service.id }}/delete/" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center p-3">No services found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

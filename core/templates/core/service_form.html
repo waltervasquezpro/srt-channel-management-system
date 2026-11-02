@@ -1,0 +1,356 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">Create / Edit Service</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Please fix the following errors:</strong>
+            <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Please fix the following errors:</strong>
+            <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li>{{ field }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        <form method="post">
+            
+            {% csrf_token %}
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Customer</label>
+                    <div class="input-group">
+                        {{ form.customer }}
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#customerModal">
+                            New Customer
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Channel</label>
+                    <div class="input-group">
+                        {{ form.channel }}
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#channelModal">
+                            New Channel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Service Type</label>
+                    {{ form.service_type }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Protocol</label>
+                    {{ form.protocol }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Public IP</label>
+                    {{ form.public_ip }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Port</label>
+                    {{ form.port }}
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Mode</label>
+                    {{ form.mode }}
+                </div>
+
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Status</label>
+                    {{ form.status }}
+                </div>
+
+                
+
+                <div class="col-12 mb-3">
+                    <label class="form-label">Notes</label>
+                    {{ form.notes }}
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="/services/" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<!-- Customer Modal -->
+<div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Customer Name</label>
+                <input type="text" id="newCustomerName" class="form-control" placeholder="Enter customer name">
+                <div id="customerError" class="text-danger mt-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveCustomer()">Save Customer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Channel Modal -->
+<div class="modal fade" id="channelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Channel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">Channel Name</label>
+                <input type="text" id="newChannelName" class="form-control" placeholder="Enter channel name">
+                <div id="channelError" class="text-danger mt-2"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveChannel()">Save Channel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function saveCustomer() {
+    const name = document.getElementById("newCustomerName").value;
+    const errorDiv = document.getElementById("customerError");
+
+    fetch("/customers/popup/create/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: new URLSearchParams({ name: name })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const select = document.getElementById("id_customer");
+            const option = new Option(data.name, data.id, true, true);
+            select.add(option);
+            document.getElementById("newCustomerName").value = "";
+            errorDiv.innerText = "";
+            bootstrap.Modal.getInstance(document.getElementById("customerModal")).hide();
+        } else {
+            errorDiv.innerText = data.errors?.name?.[0] || "Could not save customer.";
+        }
+    })
+    .catch(() => {
+        errorDiv.innerText = "Could not save customer.";
+    });
+}
+
+function saveChannel() {
+    const name = document.getElementById("newChannelName").value;
+    const errorDiv = document.getElementById("channelError");
+
+    fetch("/channels/popup/create/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: new URLSearchParams({ name: name })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const select = document.getElementById("id_channel");
+            const option = new Option(data.name, data.id, true, true);
+            select.add(option);
+            document.getElementById("newChannelName").value = "";
+            errorDiv.innerText = "";
+            bootstrap.Modal.getInstance(document.getElementById("channelModal")).hide();
+        } else {
+            errorDiv.innerText = data.errors?.name?.[0] || "Could not save customer.";
+        }
+    })
+    .catch(() => {
+        errorDiv.innerText = "Could not save channel.";
+    });
+}
+</script>
+
+<script>
+let customerSelect;
+let channelSelect;
+
+document.addEventListener("DOMContentLoaded", function () {
+    customerSelect = new TomSelect("#id_customer", {
+        create: false,
+        maxOptions: 100,
+        openOnFocus: true,
+        searchField: ["text"],
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Search customer..."
+    });
+
+    channelSelect = new TomSelect("#id_channel", {
+        create: false,
+        maxOptions: 100,
+        openOnFocus: true,
+        searchField: ["text"],
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Search channel..."
+    });
+
+    document.getElementById("customerModal").addEventListener("shown.bs.modal", function () {
+        document.getElementById("newCustomerName").focus();
+    });
+
+    document.getElementById("channelModal").addEventListener("shown.bs.modal", function () {
+        document.getElementById("newChannelName").focus();
+    });
+
+    document.getElementById("newCustomerName").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            saveCustomer();
+        }
+    });
+
+    document.getElementById("newChannelName").addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            saveChannel();
+        }
+    });
+});
+
+    channelSelect = new TomSelect("#id_channel", {
+        create: false,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        }
+    });
+
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function saveCustomer() {
+    const name = document.getElementById("newCustomerName").value.trim();
+    const errorDiv = document.getElementById("customerError");
+
+    fetch("/customers/popup/create/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: new URLSearchParams({ name: name })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            customerSelect.addOption({ value: data.id, text: data.name });
+            customerSelect.setValue(String(data.id));
+            document.getElementById("newCustomerName").value = "";
+            errorDiv.innerText = "";
+            bootstrap.Modal.getInstance(document.getElementById("customerModal")).hide();
+        } else {
+            errorDiv.innerText = "Could not save customer.";
+        }
+    })
+    .catch(() => {
+        errorDiv.innerText = "Could not save customer.";
+    });
+}
+
+function saveChannel() {
+    const name = document.getElementById("newChannelName").value.trim();
+    const errorDiv = document.getElementById("channelError");
+
+    fetch("/channels/popup/create/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: new URLSearchParams({ name: name })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            channelSelect.addOption({ value: data.id, text: data.name });
+            channelSelect.setValue(String(data.id));
+            document.getElementById("newChannelName").value = "";
+            errorDiv.innerText = "";
+            bootstrap.Modal.getInstance(document.getElementById("channelModal")).hide();
+        } else {
+            errorDiv.innerText = "Could not save channel.";
+        }
+    })
+    .catch(() => {
+        errorDiv.innerText = "Could not save channel.";
+    });
+}
+</script>
+{% endblock %}

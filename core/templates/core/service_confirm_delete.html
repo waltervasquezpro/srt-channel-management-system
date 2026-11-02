@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+
+{% block content %}
+
+<h2 class="mb-3">Remove Service</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <p>Are you sure you want to remove:</p>
+
+        <p class="fw-bold">
+            {{ service.customer }} - {{ service.channel }} - {{ service.public_ip }}:{{ service.port }}
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger">Yes, Remove</button>
+            <a href="/services/" class="btn btn-secondary">Cancel</a>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
