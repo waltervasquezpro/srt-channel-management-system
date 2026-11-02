@@ -40,16 +40,6 @@ The application uses Django's ORM for database operations, Django templates for 
 
 The application has been deployed on a dedicated Ubuntu Linux system using PostgreSQL, Gunicorn, and systemd.
 
-## Project Status
-
-**Deployed — Portfolio Documentation**
-
-The application manages streaming service configuration records. It does not automatically provision SRT streams or provide real-time stream monitoring.
-
-## Screenshots
-
-Screenshots will be added here.
-
 ## Author
 
 Walter Vasquez
